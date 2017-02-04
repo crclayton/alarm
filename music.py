@@ -23,23 +23,28 @@ def set_volume_to(percent):
 def play_song(song_file):
     pygame.mixer.music.load(song_file)
     pygame.mixer.music.play()
-    wait_and_fade()
 
-def wait_and_fade():
+def fade_song():
     global current_volume
     while pygame.mixer.music.get_busy():
         set_volume_to(min(current_volume, max_volume))
         current_volume += 0.5
         pygame.time.Clock().tick(1)
     
-if __name__ == "__main__":
-    start = datetime.now()
-    stop = start + timedelta(minutes = timeout)
-    while datetime.now() < stop:
-        print("Timeout in: " + str(stop - datetime.now()))
-        mp3 = get_random_file(music_directory, "mp3")
-        print("Song starting: " + mp3)        
-        try:
+def start():
+    end = datetime.now() + timedelta(minutes = timeout)
+    while datetime.now() < end:
+	try:
+            print("Timeout in: " + str(end - datetime.now()))
+            mp3 = get_random_file(music_directory, "mp3")
+
+            print("Song starting: " + mp3)        
             play_song(mp3)
+	    fade_song()
         except KeyboardInterrupt:
             pass # skip to the next song
+
+
+if __name__ == "__main__":
+    start()
+
