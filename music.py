@@ -1,11 +1,12 @@
-import pygame, os, random, subprocess
+import pygame, os, random, subprocess, mutagen.easyid3
 from datetime import datetime, timedelta
 
 music_directory = r"/home/crclayton/Music"
+excluded_genres = ["Hardcore", "Punk", "Podcast", "Various", "Rap", "Hip-Hop"]
 timeout         = 30 # minutes
 fade_span       =  5 # minutes
 max_volume      = 40 # %
-current_volume  =  0 # %
+current_volume  = 30 # %
 
 pygame.init()
 pygame.mixer.init()
@@ -13,9 +14,9 @@ pygame.mixer.init()
 def start():
     end = datetime.now() + timedelta(minutes = timeout)
     while datetime.now() < end:
-        print("Timeout in: " + str(end - datetime.now()))
-        mp3 = get_random_file(music_directory, "mp3")
-        print("Volume: " + str(current_volume) + ", starting: " + mp3)
+        print("Timeout:", end - datetime.now())
+        mp3 = get_song()
+        print("Volume:", current_volume)
         play_song(mp3)
         fade_song()
 
@@ -25,6 +26,19 @@ def get_random_file(dir, type):
          for filename in files
          if filename.endswith(type)]
     return random.choice(files)
+
+def get_song():
+    skip = True
+    while skip:
+        f = get_random_file(music_directory, "mp3")
+        mp3 = mutagen.easyid3.EasyID3(f)
+        genre = v(mp3, "genre")
+        skip = any([g in genre for g in excluded_genres])
+    print("Music:", v(mp3, "title"), v(mp3, "artist"), v(mp3, "album"), v(mp3,"genre"))
+    return f 
+
+def v(o, k):
+    return o.get(k, [""])[0]
 
 def set_volume_to(percent):
     subprocess.call(["amixer", "-D", "pulse", "sset", "Master", 
