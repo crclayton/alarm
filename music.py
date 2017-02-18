@@ -1,23 +1,20 @@
-import pygame, os, random, subprocess, mutagen.easyid3, math
+import pygame, os, random, subprocess, mutagen.easyid3, mutagen.mp3, math
 from datetime import datetime, timedelta
 
 music_directory = r"/home/crclayton/Music"
 excluded_genres = ["Hardcore", "Punk", "Podcast", "Various", 
-                   "Rap", "Hip-Hop", "Classical"]
+                   "Rap", "Hip-Hop", "Classical", "Audiobook"]
 
-timeout       = 30 # minutes
-fade_span     =  5 # minutes
-end_volume    = 40 # %
+timeout       = 60 # minutes
+fade_span     = 30 # minutes
+end_volume    = 50 # %
 start_volume  =  0 # %
 i = 0
-
-pygame.init()
-pygame.mixer.init()
 
 def start():
     end = datetime.now() + timedelta(minutes = timeout)
     while datetime.now() < end:
-        print("Timeout -", end - datetime.now())
+        print("Timeout:", end - datetime.now())
         start_song(get_song())
         fade_sound()
 
@@ -34,9 +31,9 @@ def get_song():
         f = get_random_file(music_directory, "mp3")
         mp3 = mutagen.easyid3.EasyID3(f)
         genre = get(mp3, "genre")
-        skip = any([g in genre for g in excluded_genres])
-    print("Music   -", get(mp3, "title"), get(mp3, "artist"), 
-                       get(mp3, "album"), get(mp3, "genre"))
+        skip = any([g.lower() in genre.lower() for g in excluded_genres])
+    print("Music:  ", get(mp3, "title"), "-", get(mp3, "artist"), 
+     		  "-", get(mp3, "album"), "-", get(mp3, "genre"))
     return f
 
 def get(obj, key):
@@ -47,6 +44,8 @@ def set_volume_to(percent):
        str(percent) + "%", "stdout=devnull"])
 
 def start_song(song_file):
+    mp3 = mutagen.mp3.MP3(song_file)
+    pygame.mixer.init(frequency=mp3.info.sample_rate)
     pygame.mixer.music.load(song_file)
     pygame.mixer.music.play()
 
@@ -58,7 +57,7 @@ def fade_sound():
         set_volume_to(volume)
         pygame.time.Clock().tick(1)
         i += 1
-    print("Volume  -", volume)
+    print("Volume: ", volume)
 
 def scale_number(unscaled, to_min, to_max, from_min, from_max):
     return (to_max-to_min)*(unscaled-from_min)/(from_max-from_min) + to_min
@@ -69,6 +68,5 @@ def scale_list(l, to_min, to_max):
 def log_scale(ticks, minimum, maximum):
     return scale_list([math.log(i+1) for i in range(ticks)], minimum, maximum)
         
-
 if __name__ == "__main__":
     start()
