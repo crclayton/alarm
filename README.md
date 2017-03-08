@@ -1,2 +1,2 @@
 # alarm
-Alarm clock scripts for waking up in the morning
+Alarm clock scripts for waking up in the morning.
