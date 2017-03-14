@@ -5,13 +5,15 @@ music_directory = r"/home/crclayton/Music"
 excluded_genres = ["Hardcore", "Punk", "Podcast", "Various", 
                    "Rap", "Hip-Hop", "Classical", "Audiobook"]
 
-timeout       = 60 # minutes
-fade_span     = 30 # minutes
-end_volume    = 50 # %
-start_volume  =  0 # %
+timeout       = 60 # [min]
+fade_span     = 60 # [min]
+fade_rate     = 40 # [1]
+end_volume    = 60 # [%]
+start_volume  =  0 # [%]
 i = 0
 
 def start():
+    set_volume_to(0)
     end = datetime.now() + timedelta(minutes = timeout)
     while datetime.now() < end:
         print("Timeout:", end - datetime.now())
@@ -66,7 +68,7 @@ def scale_list(l, to_min, to_max):
     return [scale_number(i, to_min, to_max, min(l), max(l)) for i in l]
 
 def log_scale(ticks, minimum, maximum):
-    return scale_list([math.log(i+1) for i in range(ticks)], minimum, maximum)
+    return scale_list([math.log(i+fade_rate) for i in range(ticks)], minimum, maximum)
         
 if __name__ == "__main__":
     start()
