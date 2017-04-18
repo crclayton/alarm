@@ -5,20 +5,24 @@ music_directory = r"/home/crclayton/Music"
 excluded_genres = ["Hardcore", "Punk", "Podcast", "Various", 
                    "Rap", "Hip-Hop", "Classical", "Audiobook"]
 
-timeout       = 60 # [min]
+timeout       = 90 # [min]
 fade_span     = 60 # [min]
 fade_rate     = 40 # [1]
 end_volume    = 60 # [%]
-start_volume  =  0 # [%]
+start_volume  = 10 # [%]
+keyboard_id   = 11 # find this by running xinput -list
 i = 0
 
 def start():
     set_volume_to(0)
+    # checkmate future self, no more pkilling this process 
+    subprocess.call(["xinput", "set-prop", str(keyboard_id), "Device Enabled", "0"])
     end = datetime.now() + timedelta(minutes = timeout)
     while datetime.now() < end:
         print("Timeout:", end - datetime.now())
         start_song(get_song())
         fade_sound()
+    subprocess.call(["xinput", "set-prop", str(keyboard_id), "Device Enabled", "1"])
 
 def get_random_file(dir, type):
     files = [os.path.join(path, filename)
